@@ -1,0 +1,13 @@
+diff -up ./mozilla/nsprpub/pr/src/pthreads/ptthread.c.s390x ./mozilla/nsprpub/pr/src/pthreads/ptthread.c
+--- ./mozilla/nsprpub/pr/src/pthreads/ptthread.c.s390x	2010-05-12 15:40:32.646972000 -0700
++++ ./mozilla/nsprpub/pr/src/pthreads/ptthread.c	2010-05-12 15:43:57.307156000 -0700
+@@ -857,6 +857,9 @@ static void _pt_thread_death_internal(vo
+ #if defined(DEBUG)
+     memset(thred, 0xaf, sizeof(PRThread));
+ #endif /* defined(DEBUG) */
++#if defined(__s390x__)
++    if (callDestructors)
++#endif
+     PR_Free(thred);
+ }  /* _pt_thread_death */
+ 
