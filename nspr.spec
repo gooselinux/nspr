@@ -1,7 +1,7 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
-Version:        4.8.6
-Release:        1%{?dist}
+Version:        4.8.8
+Release:        3%{?dist}
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System Environment/Libraries
@@ -51,6 +51,10 @@ cp %{SOURCE2} ./mozilla/nsprpub/config/
 
 %build
 
+# partial RELRO support as a security enhancement
+LDFLAGS+=-Wl,-z,relro
+export LDFLAGS
+
 ./mozilla/nsprpub/configure \
                  --prefix=%{_prefix} \
                  --libdir=%{_libdir} \
@@ -62,6 +66,18 @@ cp %{SOURCE2} ./mozilla/nsprpub/config/
                  --disable-debug
 
 make
+
+%check
+
+# Run test suite.
+perl ./mozilla/nsprpub/pr/tests/runtests.pl 2>&1 | tee output.log
+
+TEST_FAILURES=`grep -c FAILED ./output.log` || :
+if [ $TEST_FAILURES -ne 0 ]; then
+  echo "error: test suite returned failure(s)"
+  exit 1
+fi
+echo "test suite completed"
 
 %install
 
@@ -133,6 +149,18 @@ done
 %{_bindir}/nspr-config
 
 %changelog
+* Fri Jul 22 2011 Elio Maldonado <emaldona@redhat.com> - 4.8.8-3
+- Add partial RELRO support as a security enhancement
+
+* Mon Jul 18 2011 Elio Maldonado <emaldona@redhat.com> - 4.8.8-2
+- Run the nspr test suite in the %%check section
+
+* Mon Jul 11 2011 Elio Maldonado <emaldona@redhat.com> - 4.8.8-1
+- Update to 4.8.8
+
+* Mon Jan 17 2011 Elio Maldonado <emaldona@redhat.com> - 4.8.7-1
+- Update to 4.8.7
+
 * Thu Aug 24 2010 Kai Engert <kaie@redhat.com> - 4.8.6-1
 - update to 4.8.6
 
